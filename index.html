@@ -1,8 +1,37 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-</head>
-<h1>Hello Github!</h1>
-    <h2>Anyone out there?</h2>
-</html>
+import folium
+import geopandas as gpd
+
+m = folium.Map(
+    location=[47.373006, 8.541899], 
+    tiles="Cartodb Positron",
+    zoom_start=16)
+
+# BASEMAP // LAYERS - Aerial imagery
+folium.TileLayer(
+    tiles="https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{z}/{x}/{y}.jpeg",
+    attr="© swisstopo",
+    name="SwissTopo", 
+    show=False # toggle
+).add_to(m)
+folium.LayerControl().add_to(m)
+
+# Lindenhof
+folium.Marker([47.37321905330104, 8.540722301392881], popup="Lindenhof").add_to(m)
+
+# Bahnhofstrasse
+line = [[47.37695065814542, 8.539923619208585], [47.37391918165214, 8.538347371935744],[47.372387365792214, 8.538315847011129],[47.36640881650844, 8.540597740303033]]
+folium.PolyLine(line, popup="Bahnhofstrasse").add_to(m)
+
+# Altstadt polygon
+polygon = [[47.372496510375036, 8.54274402074943], [47.372636877758836, 8.543811448057477], [47.37312816066, 8.543769994569788], [47.373970349271296, 8.54648519801356],[47.37705825910816, 8.544422887000925],[47.376917903492995, 8.543303642833262],[47.37637051302401, 8.543396913180569],[47.37250352875309, 8.542712930633664]]
+folium.Polygon(polygon, popup="Niederdorf").add_to(m)
+
+# BIKE PARKING
+file = "bike_parking.json"
+bike_parking = gpd.read_file(file).to_crs(epsg=4326)
+
+for index, row in bike_parking.iterrows():
+    coordinates = row['geometry'].centroid.coords[0]
+    folium.Marker(location=[coordinates[1], coordinates[0]], popup=row['name']).add_to(m) # name field shows if it's motorbike, bike, or both
+
+m
